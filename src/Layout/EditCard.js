@@ -1,42 +1,65 @@
-import React, { useEffect,Fragment, useState } from "react";
-import { useParams } from "react-router-dom";
-import { readCard } from "../utils/api";
-import CardForm from "./CardForm";
+import React, { useEffect, Fragment, useState } from 'react'
+import { useHistory, useParams } from 'react-router-dom'
+import { readCard, updateCard } from '../utils/api'
+import CardForm from './CardForm'
 
 function EditCard({ setLoading, loading }) {
-  const { cardId, deckId } = useParams();
-  const [initialEditCardData, setCardData] = useState();
+  const { cardId, deckId } = useParams()
+  const [cardData, setCardData] = useState()
+  const history = useHistory()
 
   useEffect(() => {
-    function loadEditCardData() {
-      const abortController = new AbortController();
+    async function loadEditCardData() {
+      const abortController = new AbortController()
       try {
-        readCard(cardId, abortController.signal).then((currentCard) => {
-           setCardData(currentCard);
-        });  
+        const currentCard = await readCard(cardId, abortController.signal)
+        setCardData(currentCard)
       } catch (error) {
-        if (error.name === "AbortError") {
-          console.log("loadEditCardData Aborted");
+        if (error.name === 'AbortError') {
+          console.log('loadEditCardData Aborted')
         } else {
-          throw error;
+          throw error
         }
       }
-      return () => abortController.abort();
+      return () => abortController.abort()
     }
-    loadEditCardData();
-  }, []);
+    loadEditCardData()
+  }, [cardId])
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    const abortController = new AbortController()
+
+    try {
+      setLoading(true)
+      await updateCard(cardData, abortController.signal)
+      setLoading(false)
+      history.push(`/decks/${deckId}`)
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        console.log('CardForm Aborted')
+      } else {
+        throw error
+      }
+    }
+    return () => abortController.abort()
+  }
 
   const renderView = (
     <div>
       <h2>Edit Card</h2>
-      <CardForm initialCardData={initialEditCardData} setLoading={setLoading} />
+      <CardForm
+        cardData={cardData}
+        setCardData={setCardData}
+        handleSubmit={handleSubmit}
+      />
     </div>
-  );
-  if (loading || !initialEditCardData) {
-    return <p>Edit Card Loading...</p>;
+  )
+  if (loading || !cardData) {
+    return <p>Edit Card Loading...</p>
   } else {
-    return <Fragment>{renderView}</Fragment>;
+    return <Fragment>{renderView}</Fragment>
   }
 }
 
-export default EditCard;
+export default EditCard

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from "react";
+import React, { Fragment } from "react";
 import { useParams, Link, useHistory } from "react-router-dom";
 import { Button } from "./Button";
 import { updateDeck } from "../utils/api/index";
@@ -7,18 +7,12 @@ import { updateDeck } from "../utils/api/index";
 function EditDeck({ setCurrentDeck, currentDeck, setLoading, loading }) {
   const { deckId } = useParams();
 
-  const { name, description } = currentDeck;
   const history = useHistory();
-  const [editDeckData, setEditDeckData] = useState({
-    name,
-    description,
-    id: Number(deckId),
-  });
 
   const handleChange = ({ target }) => {
     let val = target.value;
-    setEditDeckData({
-      ...editDeckData,
+    setCurrentDeck({
+      ...currentDeck,
       [target.name]: val,
     });
   };
@@ -28,7 +22,7 @@ function EditDeck({ setCurrentDeck, currentDeck, setLoading, loading }) {
     const abortController = new AbortController();
 
     setLoading(true);
-    await updateDeck(editDeckData, abortController.signal);
+    await updateDeck(currentDeck, abortController.signal);
     setLoading(false);
     history.push(`/decks/${deckId}`);
     return () => abortController.abort();
@@ -45,7 +39,7 @@ function EditDeck({ setCurrentDeck, currentDeck, setLoading, loading }) {
           type="text"
           className="form-control"
           onChange={handleChange}
-          value={editDeckData.name}
+          value={currentDeck.name}
           id="name"
           name="name"
         />
@@ -53,7 +47,7 @@ function EditDeck({ setCurrentDeck, currentDeck, setLoading, loading }) {
         <textarea
           className="form-control"
           onChange={handleChange}
-          value={editDeckData.description}
+          value={currentDeck.description}
           id="description"
           name="description"
           rows="3"

@@ -1,30 +1,9 @@
-import React, { useState,Fragment} from "react";
-import { useHistory } from "react-router-dom";
-import { createDeck } from "../utils/api/index";
-import { Button } from "./Button";
+import React, { Fragment } from 'react'
+import { Button } from './Button'
+import { useHistory } from 'react-router-dom'
 
-function CreateDeck({ setLoading, loading }) {
-  const initialFormData = {
-    name: "",
-    description: "",
-  };
-  const [formData, setFormData] = useState(initialFormData);
-  const history = useHistory();
-
-  const handleChange = ({ target }) => {
-    setFormData({
-      ...formData,
-      [target.name]: target.value,
-    });
-  };
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setLoading(true);
-    const { id } = await createDeck(formData);
-    setLoading(false);
-    history.push(`/decks/${id}`);
-  }
+function CreateDeck({ deckData, handleChange, handleSubmit, loading }) {
+  const history = useHistory()
 
   const renderView = (
     <div>
@@ -39,7 +18,7 @@ function CreateDeck({ setLoading, loading }) {
           name="name"
           onChange={handleChange}
           className="form-control"
-          value={formData.name}
+          value={deckData.name}
           placeholder="Deck Name"
         />
         <label htmlFor="deckDescription">Description</label>
@@ -48,20 +27,20 @@ function CreateDeck({ setLoading, loading }) {
           name="description"
           onChange={handleChange}
           className="form-control"
-          value={formData.description}
+          value={deckData.description}
           rows="3"
           placeholder="Brief description of the deck"
         />
-        <Button onClick={() => history.push("/")}>Cancel</Button>
+        <Button onClick={() => history.push('/')}>Cancel</Button>
         <Button type="submit">Submit</Button>
       </form>
     </div>
-  );
+  )
   if (loading) {
-    return <p>Loading Create Deck...</p>;
+    return <p>Loading Create Deck...</p>
   } else {
-    return <Fragment>{renderView}</Fragment>;
+    return <Fragment>{renderView}</Fragment>
   }
 }
 
-export default CreateDeck;
+export default CreateDeck
